@@ -4,6 +4,8 @@
 PanicZero is a community-powered disaster preparedness web app built for HackMatrix 2026 at VIT Bhopal. It lets citizens report local incidents, receive AI-generated safety alerts, access offline emergency guides, and view real-time crowd-sourced maps — all in one place.
 
 ---
+Deployed Link - https://paniczero.onrender.com
+
 
 ## 🌐 Problem Statement
 **HM50 — Disaster Preparedness App** | Open Innovation Track
