@@ -76,3 +76,9 @@ resqnet/
 - Convertible to a Progressive Web App (PWA) for mobile
 
 ---
+
+Requirements:
+flask
+flask-cors
+openai
+python-dotenv
