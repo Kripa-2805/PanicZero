@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PanicZero — India's Disaster Intelligence Network</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+</head>
+<body>
+
+  <!-- ===== RADAR SCAN LINE (ambient effect) ===== -->
+  <div class="radar-ambient" id="radar-ambient"></div>
+
+  <!-- ===== SOS MODAL ===== -->
+  <div id="sos-modal" class="sos-modal" aria-modal="true" role="dialog">
+    <div class="sos-modal-inner">
+      <button class="sos-close" onclick="closeSOS()" aria-label="Close">&times;</button>
+      <div class="sos-pulse-ring"></div>
+      <div class="sos-icon">🆘</div>
+      <h2>Emergency Contacts</h2>
+      <p class="sos-sub">India — Available 24/7</p>
+      <div class="sos-grid">
+        <a href="tel:112" class="sos-contact red"><span class="sos-num">112</span><span class="sos-label">All Emergencies</span></a>
+        <a href="tel:101" class="sos-contact orange"><span class="sos-num">101</span><span class="sos-label">Fire Brigade</span></a>
+        <a href="tel:102" class="sos-contact blue"><span class="sos-num">102</span><span class="sos-label">Ambulance</span></a>
+        <a href="tel:100" class="sos-contact dark"><span class="sos-num">100</span><span class="sos-label">Police</span></a>
+        <a href="tel:1078" class="sos-contact green"><span class="sos-num">1078</span><span class="sos-label">NDRF Helpline</span></a>
+        <a href="tel:1070" class="sos-contact purple"><span class="sos-num">1070</span><span class="sos-label">State Disaster</span></a>
+      </div>
+      <p class="sos-note">Tap any number to call directly from your device</p>
+    </div>
+  </div>
+  <div class="sos-overlay" id="sos-overlay" onclick="closeSOS()"></div>
+
+  <!-- ===== HEADER ===== -->
+  <header id="site-header">
+    <div class="logo">
+      <div class="logo-mark">
+        <span class="logo-dot"></span>
+      </div>
+      <span class="logo-text">Panic<span class="logo-accent">Zero</span></span>
+      <span class="logo-status">LIVE</span>
+    </div>
+    <nav>
+      <a href="#alerts" class="nav-link">Alerts</a>
+      <a href="#radar" class="nav-link">Radar</a>
+      <a href="#map" class="nav-link">Map</a>
+      <a href="#report" class="nav-link">Report</a>
+      <a href="#preparedness" class="nav-link">Preparedness</a>
+      <a href="#guide" class="nav-link">Guide</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+      <button class="crisis-btn" onclick="openSOS()"><span class="crisis-pulse"></span>🆘 SOS</button>
+      <button class="hamburger" onclick="toggleNav()" aria-label="Menu">☰</button>
+    </div>
+  </header>
+
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="#alerts" onclick="toggleNav()">Alerts</a>
+    <a href="#radar" onclick="toggleNav()">Radar</a>
+    <a href="#map" onclick="toggleNav()">Map</a>
+    <a href="#report" onclick="toggleNav()">Report</a>
+    <a href="#preparedness" onclick="toggleNav()">Preparedness</a>
+    <a href="#guide" onclick="toggleNav()">Guide</a>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="hero-grid"></div>
+      <div class="hero-glow hero-glow-1"></div>
+      <div class="hero-glow hero-glow-2"></div>
+      <div class="hero-glow hero-glow-3"></div>
+      <div class="hero-scanline"></div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-eyebrow animate-fade-up">
+        <span class="eyebrow-dot"></span>
+        India's Community Disaster Intelligence Network
+      </div>
+
+      <h1 class="hero-headline animate-fade-up delay-1">
+        When disaster<br>
+        <span class="headline-gradient">strikes —</span><br>
+        <span class="headline-outline">be ready.</span>
+      </h1>
+
+      <p class="hero-sub animate-fade-up delay-2">
+        Real-time AI alerts · Community incident mapping · Offline emergency guides.<br>
+        Built for India. Built for life.
+      </p>
+
+      <div class="hero-cta-row animate-fade-up delay-3">
+        <div class="location-bar">
+          <div class="location-input-wrap">
+            <span class="loc-icon">📍</span>
+            <input type="text" id="location-input" placeholder="Enter your city (Mumbai, Delhi...)" autocomplete="off" />
+          </div>
+          <button onclick="getSummary()" id="alert-btn" class="primary-btn">
+            <span id="alert-btn-label">Get Safety Alert</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-stats animate-fade-up delay-4">
+        <div class="hero-stat">
+          <span class="stat-num" id="stat-incidents">—</span>
+          <span class="stat-label">Reports Today</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="hero-stat">
+          <span class="stat-num">17</span>
+          <span class="stat-label">Cities Monitored</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="hero-stat">
+          <span class="stat-num">24/7</span>
+          <span class="stat-label">AI Surveillance</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="hero-stat">
+          <span class="stat-num">0s</span>
+          <span class="stat-label">Alert Delay</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ===== AI ALERT SUMMARY ===== -->
+  <section id="alerts" class="section">
+    <div class="section-label">AI POWERED</div>
+    <h2 class="section-title">Safety Intelligence</h2>
+    <p class="section-sub">Get a real-time AI-generated safety briefing for your location — including weather, active incidents, and threat level.</p>
+
+    <div id="summary-card" class="summary-card">
+      <div class="summary-placeholder">
+        <div class="placeholder-radar">
+          <div class="ph-ring ph-ring-1"></div>
+          <div class="ph-ring ph-ring-2"></div>
+          <div class="ph-ring ph-ring-3"></div>
+          <div class="ph-sweep"></div>
+          <span class="ph-icon">🗺️</span>
+        </div>
+        <p>Enter your city above to receive a personalised AI safety brief.</p>
+      </div>
+    </div>
+    <div id="weather-strip" class="weather-strip" style="display:none"></div>
+  </section>
+
+  <!-- ===== DISASTER RADAR (NEW) ===== -->
+  <section id="radar" class="section radar-section">
+    <div class="section-label">NEW FEATURE</div>
+    <h2 class="section-title">Disaster Radar</h2>
+    <p class="section-sub">Live threat level monitoring across India — updated by community reports and AI analysis.</p>
+
+    <div class="radar-dashboard">
+      <!-- Threat Meter -->
+      <div class="radar-threat-card">
+        <div class="threat-header">
+          <span class="threat-title">NATIONAL THREAT INDEX</span>
+          <span class="threat-live-badge">● LIVE</span>
+        </div>
+        <div class="threat-arc-wrap">
+          <svg class="threat-arc" viewBox="0 0 200 110">
+            <defs>
+              <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#2ecc71"/>
+                <stop offset="50%" stop-color="#f39c12"/>
+                <stop offset="100%" stop-color="#e74c3c"/>
+              </linearGradient>
+            </defs>
+            <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="16" stroke-linecap="round"/>
+            <path id="arc-fill" d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="url(#arcGrad)" stroke-width="16" stroke-linecap="round"
+                  stroke-dasharray="251" stroke-dashoffset="200"/>
+            <line id="arc-needle" x1="100" y1="100" x2="20" y2="100" stroke="white" stroke-width="2.5" stroke-linecap="round"
+                  transform="rotate(-70, 100, 100)" style="transition: transform 1.2s cubic-bezier(.34,1.56,.64,1)"/>
+            <circle cx="100" cy="100" r="5" fill="white"/>
+            <text x="100" y="86" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" font-family="DM Mono">THREAT LEVEL</text>
+            <text id="arc-label" x="100" y="70" text-anchor="middle" fill="white" font-size="18" font-weight="700" font-family="Syne">—</text>
+          </svg>
+        </div>
+        <div class="threat-scale">
+          <span style="color:#2ecc71">LOW</span>
+          <span style="color:#f39c12">MODERATE</span>
+          <span style="color:#e74c3c">HIGH</span>
+        </div>
+      </div>
+
+      <!-- Category Breakdown -->
+      <div class="radar-categories">
+        <div class="radar-cat-title">ACTIVE THREAT CATEGORIES</div>
+        <div class="radar-cat-list" id="radar-cat-list">
+          <div class="radar-cat-item">
+            <span class="cat-icon">🌊</span>
+            <span class="cat-name">Flood</span>
+            <div class="cat-bar-wrap"><div class="cat-bar" style="width:0%" data-type="flood"></div></div>
+            <span class="cat-count" id="cat-flood">0</span>
+          </div>
+          <div class="radar-cat-item">
+            <span class="cat-icon">🔥</span>
+            <span class="cat-name">Fire</span>
+            <div class="cat-bar-wrap"><div class="cat-bar" style="width:0%" data-type="fire"></div></div>
+            <span class="cat-count" id="cat-fire">0</span>
+          </div>
+          <div class="radar-cat-item">
+            <span class="cat-icon">🏚️</span>
+            <span class="cat-name">Earthquake</span>
+            <div class="cat-bar-wrap"><div class="cat-bar" style="width:0%" data-type="quake"></div></div>
+            <span class="cat-count" id="cat-quake">0</span>
+          </div>
+          <div class="radar-cat-item">
+            <span class="cat-icon">🌀</span>
+            <span class="cat-name">Cyclone</span>
+            <div class="cat-bar-wrap"><div class="cat-bar" style="width:0%" data-type="cyclone"></div></div>
+            <span class="cat-count" id="cat-cyclone">0</span>
+          </div>
+          <div class="radar-cat-item">
+            <span class="cat-icon">⚠️</span>
+            <span class="cat-name">Other</span>
+            <div class="cat-bar-wrap"><div class="cat-bar" style="width:0%" data-type="other"></div></div>
+            <span class="cat-count" id="cat-other">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Ticker -->
+      <div class="radar-ticker-card">
+        <div class="ticker-header">
+          <span class="ticker-title">LIVE ALERT TICKER</span>
+          <span class="ticker-blink">⚡</span>
+        </div>
+        <div class="ticker-scroll" id="ticker-scroll">
+          <div class="ticker-item ticker-empty">No active alerts — system monitoring…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LIVE MAP ===== -->
+  <section id="map" class="section">
+    <div class="section-label">COMMUNITY POWERED</div>
+    <h2 class="section-title">Live Incident Map</h2>
+    <p class="section-sub">Every pin is a community report, AI-classified and geolocated in real time.</p>
+
+    <div class="map-wrapper">
+      <div class="map-overlay-info">
+        <span class="map-live-pulse"></span>
+        <span>LIVE</span>
+      </div>
+      <svg id="india-map" viewBox="0 0 620 580" xmlns="http://www.w3.org/2000/svg" aria-label="India incident map">
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="soft-glow">
+            <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <radialGradient id="mapGrad" cx="50%" cy="45%" r="55%">
+            <stop offset="0%" stop-color="#0f2518"/>
+            <stop offset="100%" stop-color="#071209"/>
+          </radialGradient>
+          <radialGradient id="mapGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(46,204,113,0.08)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Background glow -->
+        <ellipse cx="310" cy="290" rx="220" ry="250" fill="url(#mapGlow)" />
+
+        <!-- India outline -->
+        <path class="india-shape" d="
+          M268,52 L280,48 L296,50 L312,48 L330,55 L348,52 L362,58 L374,72
+          L388,70 L402,82 L416,88 L428,102 L436,118 L448,128 L462,142
+          L474,162 L482,178 L498,172 L510,186 L516,202 L508,220 L496,236
+          L480,248 L468,268 L472,290 L464,312 L450,334 L434,352 L418,368
+          L400,384 L382,398 L366,414 L350,430 L334,446 L318,460 L304,470
+          L290,460 L274,446 L258,430 L244,414 L230,396 L218,376 L208,354
+          L198,330 L192,306 L188,280 L192,258 L182,234 L174,208 L178,184
+          L190,164 L202,146 L214,128 L224,110 L236,92 L250,74 Z"
+          fill="url(#mapGrad)" stroke="rgba(46,204,113,0.5)" stroke-width="1.5" stroke-linejoin="round"/>
+
+        <path class="india-shape" d="M250,74 L258,58 L270,50 L284,44 L298,46 L312,48 L296,50 L280,48 L268,52 Z"
+          fill="#0d1f11" stroke="rgba(46,204,113,0.3)" stroke-width="1"/>
+        <path class="india-shape" d="M474,162 L488,152 L504,158 L516,172 L522,192 L510,186 L498,172 Z"
+          fill="#0d1f11" stroke="rgba(46,204,113,0.3)" stroke-width="1"/>
+        <ellipse cx="328" cy="496" rx="10" ry="14" fill="#0d1f11" stroke="rgba(46,204,113,0.25)" stroke-width="1"/>
+
+        <!-- Subtle grid lines -->
+        <path d="M310,145 L295,230 M295,230 L230,310 M310,145 L355,175 M355,175 L400,205"
+          stroke="rgba(46,204,113,0.1)" stroke-width="0.5" stroke-dasharray="4,6" fill="none"/>
+
+        <!-- City dots -->
+        <g id="cities">
+          <g class="city-group" onclick="highlightCity('Delhi')"><circle class="city-dot" data-city="Delhi" cx="310" cy="145" r="5" fill="#2196f3"/><circle cx="310" cy="145" r="11" fill="#2196f3" opacity="0.12" class="city-pulse"/><text x="320" y="142" class="city-label">Delhi</text></g>
+          <g class="city-group" onclick="highlightCity('Mumbai')"><circle class="city-dot" data-city="Mumbai" cx="228" cy="308" r="5" fill="#2196f3"/><circle cx="228" cy="308" r="11" fill="#2196f3" opacity="0.12" class="city-pulse"/><text x="238" y="305" class="city-label">Mumbai</text></g>
+          <g class="city-group" onclick="highlightCity('Chennai')"><circle class="city-dot" data-city="Chennai" cx="328" cy="418" r="5" fill="#2196f3"/><text x="338" y="415" class="city-label">Chennai</text></g>
+          <g class="city-group" onclick="highlightCity('Kolkata')"><circle class="city-dot" data-city="Kolkata" cx="450" cy="250" r="5" fill="#2196f3"/><text x="460" y="247" class="city-label">Kolkata</text></g>
+          <g class="city-group" onclick="highlightCity('Bangalore')"><circle class="city-dot" data-city="Bangalore" cx="298" cy="398" r="5" fill="#2196f3"/><text x="250" y="402" class="city-label">Bangalore</text></g>
+          <g class="city-group" onclick="highlightCity('Hyderabad')"><circle class="city-dot" data-city="Hyderabad" cx="308" cy="344" r="5" fill="#2196f3"/><text x="260" y="348" class="city-label">Hyderabad</text></g>
+          <g class="city-group" onclick="highlightCity('Bhopal')"><circle class="city-dot" data-city="Bhopal" cx="293" cy="228" r="5" fill="#2196f3"/><text x="302" y="225" class="city-label">Bhopal</text></g>
+          <g class="city-group" onclick="highlightCity('Ahmedabad')"><circle class="city-dot" data-city="Ahmedabad" cx="208" cy="234" r="5" fill="#2196f3"/><text x="156" y="231" class="city-label">Ahmedabad</text></g>
+          <g class="city-group" onclick="highlightCity('Pune')"><circle class="city-dot" data-city="Pune" cx="240" cy="320" r="5" fill="#2196f3"/><text x="248" y="317" class="city-label">Pune</text></g>
+          <g class="city-group" onclick="highlightCity('Jaipur')"><circle class="city-dot" data-city="Jaipur" cx="263" cy="174" r="5" fill="#2196f3"/><text x="200" y="178" class="city-label">Jaipur</text></g>
+          <g class="city-group" onclick="highlightCity('Lucknow')"><circle class="city-dot" data-city="Lucknow" cx="354" cy="174" r="5" fill="#2196f3"/><text x="362" y="171" class="city-label">Lucknow</text></g>
+          <g class="city-group" onclick="highlightCity('Patna')"><circle class="city-dot" data-city="Patna" cx="398" cy="204" r="5" fill="#2196f3"/><text x="408" y="201" class="city-label">Patna</text></g>
+          <g class="city-group" onclick="highlightCity('Bhubaneswar')"><circle class="city-dot" data-city="Bhubaneswar" cx="413" cy="284" r="5" fill="#2196f3"/><text x="420" y="281" class="city-label">Bhubaneswar</text></g>
+          <g class="city-group" onclick="highlightCity('Guwahati')"><circle class="city-dot" data-city="Guwahati" cx="488" cy="174" r="5" fill="#2196f3"/><text x="496" y="171" class="city-label">Guwahati</text></g>
+          <g class="city-group" onclick="highlightCity('Srinagar')"><circle class="city-dot" data-city="Srinagar" cx="263" cy="94" r="5" fill="#2196f3"/><text x="271" y="91" class="city-label">Srinagar</text></g>
+          <g class="city-group" onclick="highlightCity('Visakhapatnam')"><circle class="city-dot" data-city="Visakhapatnam" cx="388" cy="330" r="5" fill="#2196f3"/><text x="396" y="327" class="city-label">Vizag</text></g>
+          <g class="city-group" onclick="highlightCity('Kochi')"><circle class="city-dot" data-city="Kochi" cx="272" cy="444" r="5" fill="#2196f3"/><text x="228" y="448" class="city-label">Kochi</text></g>
+        </g>
+
+        <g id="incident-layer"></g>
+
+        <g class="map-legend" transform="translate(14, 530)">
+          <rect x="0" y="-18" width="200" height="24" rx="6" fill="rgba(0,0,0,0.6)" opacity="1"/>
+          <circle cx="12" cy="0" r="4" fill="#2196f3"/><text x="22" y="4" class="legend-text">City</text>
+          <circle cx="58" cy="0" r="4" fill="#e53935"/><text x="68" y="4" class="legend-text">High</text>
+          <circle cx="104" cy="0" r="4" fill="#f57c00"/><text x="114" y="4" class="legend-text">Medium</text>
+          <circle cx="158" cy="0" r="4" fill="#2e7d32"/><text x="168" y="4" class="legend-text">Low</text>
+        </g>
+      </svg>
+
+      <div id="map-popup" class="map-popup"></div>
+    </div>
+    <p class="map-hint">👆 Click any city to see incidents or pre-fill the report form</p>
+  </section>
+
+  <!-- ===== REPORT FORM ===== -->
+  <section id="report" class="section">
+    <div class="section-label">COMMUNITY ACTION</div>
+    <h2 class="section-title">Report an Incident</h2>
+    <p class="section-sub">Your report is AI-classified, mapped in real time, and helps protect your community. No login needed.</p>
+
+    <div class="report-layout">
+      <div class="report-info">
+        <h3>Be the first responder.</h3>
+        <p>Every report you submit adds to India's collective safety intelligence. Our AI instantly classifies severity and alerts nearby users.</p>
+        <div class="report-steps">
+          <div class="step">
+            <span class="step-num">01</span>
+            <div class="step-content">
+              <strong>Choose a city</strong>
+              <p>Click on the map or type below</p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">02</span>
+            <div class="step-content">
+              <strong>Describe the incident</strong>
+              <p>What, where, and how serious</p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-num">03</span>
+            <div class="step-content">
+              <strong>AI classifies severity</strong>
+              <p>Instantly mapped and broadcast</p>
+            </div>
+          </div>
+        </div>
+        <div class="report-impact-card">
+          <span class="impact-icon">🎯</span>
+          <div>
+            <strong>Real impact</strong>
+            <p>Reports are analysed by AI and surfaced in safety summaries for all users in that area.</p>
+          </div>
+        </div>
+      </div>
+
+      <form class="report-form" onsubmit="submitReport(event)" novalidate>
+        <div class="field-group">
+          <label for="report-location">📍 Location</label>
+          <input type="text" id="report-location" placeholder="City name (e.g. Bhopal, Mumbai)" required />
+        </div>
+        <div class="field-group">
+          <label for="report-desc">📋 Incident Description</label>
+          <textarea id="report-desc" placeholder="Describe the incident clearly — what, where, and how serious..." rows="4" required></textarea>
+        </div>
+        <input type="hidden" id="report-lat" value="23.2599"/>
+        <input type="hidden" id="report-lng" value="77.4126"/>
+        <button type="submit" class="submit-btn">
+          <span id="submit-label">Submit Report</span>
+          <span class="btn-arrow">→</span>
+        </button>
+        <div id="report-status"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== RECENT REPORTS FEED ===== -->
+  <section id="feed" class="section">
+    <div class="section-label">LIVE FEED</div>
+    <h2 class="section-title">Recent Reports</h2>
+    <div id="incidents-feed" class="incidents-feed">
+      <p class="feed-placeholder">Loading recent reports…</p>
+    </div>
+  </section>
+
+  <!-- ===== PREPAREDNESS SCORE (NEW) ===== -->
+  <section id="preparedness" class="section prep-section">
+    <div class="section-label">INTERACTIVE TOOL</div>
+    <h2 class="section-title">How Prepared Are You?</h2>
+    <p class="section-sub">Answer 6 quick questions to get your personal disaster preparedness score and an action plan.</p>
+
+    <div class="prep-layout">
+      <div class="prep-quiz" id="prep-quiz">
+        <div class="quiz-progress">
+          <div class="quiz-progress-bar" id="quiz-progress-bar" style="width:0%"></div>
+        </div>
+        <div class="quiz-step active" id="qstep-0">
+          <p class="quiz-q">Do you know all emergency contact numbers? (112, 101, 102, 100)</p>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="answerQuiz(0,3,'yes')">✅ Yes, memorised</button>
+            <button class="quiz-opt" onclick="answerQuiz(0,1,'partial')">🤔 Some of them</button>
+            <button class="quiz-opt" onclick="answerQuiz(0,0,'no')">❌ Not really</button>
+          </div>
+        </div>
+        <div class="quiz-step" id="qstep-1">
+          <p class="quiz-q">Do you have an emergency kit at home? (water, food, first aid, torch)</p>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="answerQuiz(1,3,'yes')">✅ Fully stocked</button>
+            <button class="quiz-opt" onclick="answerQuiz(1,1,'partial')">🤔 Partially</button>
+            <button class="quiz-opt" onclick="answerQuiz(1,0,'no')">❌ No kit</button>
+          </div>
+        </div>
+        <div class="quiz-step" id="qstep-2">
+          <p class="quiz-q">Does your family have an emergency meeting point if you get separated?</p>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="answerQuiz(2,3,'yes')">✅ Yes, planned</button>
+            <button class="quiz-opt" onclick="answerQuiz(2,1,'partial')">🤔 Loosely</button>
+            <button class="quiz-opt" onclick="answerQuiz(2,0,'no')">❌ No plan</button>
+          </div>
+        </div>
+        <div class="quiz-step" id="qstep-3">
+          <p class="quiz-q">Are you subscribed to weather / disaster alerts for your city?</p>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="answerQuiz(3,3,'yes')">✅ Yes</button>
+            <button class="quiz-opt" onclick="answerQuiz(3,0,'no')">❌ No</button>
+          </div>
+        </div>
+        <div class="quiz-step" id="qstep-4">
+          <p class="quiz-q">Do you know the evacuation routes from your home / area?</p>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="answerQuiz(4,3,'yes')">✅ Yes, know routes</button>
+            <button class="quiz-opt" onclick="answerQuiz(4,1,'partial')">🤔 Not sure</button>
+            <button class="quiz-opt" onclick="answerQuiz(4,0,'no')">❌ No idea</button>
+          </div>
+        </div>
+        <div class="quiz-step" id="qstep-5">
+          <p class="quiz-q">Have you ever practiced a fire / earthquake drill?</p>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="answerQuiz(5,3,'yes')">✅ Yes, recently</button>
+            <button class="quiz-opt" onclick="answerQuiz(5,1,'partial')">🤔 Years ago</button>
+            <button class="quiz-opt" onclick="answerQuiz(5,0,'no')">❌ Never</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="prep-result" id="prep-result" style="display:none">
+        <div class="result-ring-wrap">
+          <svg class="result-ring" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="10"/>
+            <circle id="result-ring-fill" cx="60" cy="60" r="50" fill="none" stroke="#2ecc71" stroke-width="10"
+                    stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314"
+                    transform="rotate(-90 60 60)" style="transition: stroke-dashoffset 1.2s ease"/>
+          </svg>
+          <div class="result-score-inner">
+            <span id="result-score-num">0</span>
+            <span class="result-score-denom">/18</span>
+          </div>
+        </div>
+        <div class="result-label-wrap">
+          <h3 id="result-label">Calculating…</h3>
+          <p id="result-desc"></p>
+        </div>
+        <div class="result-actions" id="result-actions"></div>
+        <button class="retake-btn" onclick="resetQuiz()">↺ Retake Quiz</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== EMERGENCY GUIDE ===== -->
+  <section id="guide" class="section">
+    <div class="section-label">OFFLINE READY</div>
+    <h2 class="section-title">Emergency Guide</h2>
+    <p class="section-sub">Tap any card to expand. Designed to work even without internet — bookmark this page.</p>
+
+    <div class="guide-grid">
+      <details class="guide-card">
+        <summary><span class="guide-emoji">🌊</span><span class="guide-title">Flood</span><span class="guide-arrow">›</span></summary>
+        <ul>
+          <li>Move to higher ground immediately</li>
+          <li>Avoid walking or driving in moving water</li>
+          <li>Turn off electricity at the main switch</li>
+          <li>Keep a waterproof bag with essentials</li>
+          <li>Call 112 or NDRF (1078) for evacuation</li>
+        </ul>
+      </details>
+      <details class="guide-card">
+        <summary><span class="guide-emoji">🏚️</span><span class="guide-title">Earthquake</span><span class="guide-arrow">›</span></summary>
+        <ul>
+          <li>Drop, cover, and hold on</li>
+          <li>Stay away from windows and heavy furniture</li>
+          <li>Do NOT use elevators</li>
+          <li>Check for gas leaks after shaking stops</li>
+          <li>Expect aftershocks — stay prepared</li>
+        </ul>
+      </details>
+      <details class="guide-card">
+        <summary><span class="guide-emoji">🌡️</span><span class="guide-title">Heatwave</span><span class="guide-arrow">›</span></summary>
+        <ul>
+          <li>Stay indoors between 12 PM – 4 PM</li>
+          <li>Drink water every 30 minutes</li>
+          <li>Wear light, loose, light-coloured clothing</li>
+          <li>Check on elderly and young children</li>
+          <li>Avoid strenuous outdoor activity</li>
+        </ul>
+      </details>
+      <details class="guide-card">
+        <summary><span class="guide-emoji">🌀</span><span class="guide-title">Cyclone</span><span class="guide-arrow">›</span></summary>
+        <ul>
+          <li>Stay indoors and away from windows</li>
+          <li>Store water and non-perishable food</li>
+          <li>Secure loose objects outside</li>
+          <li>Follow evacuation orders immediately</li>
+          <li>Do not go out during the eye of the storm</li>
+        </ul>
+      </details>
+      <details class="guide-card">
+        <summary><span class="guide-emoji">🔥</span><span class="guide-title">Fire</span><span class="guide-arrow">›</span></summary>
+        <ul>
+          <li>Evacuate immediately — don't use lifts</li>
+          <li>Crawl low under smoke</li>
+          <li>Close doors to slow fire spread</li>
+          <li>Call Fire Brigade: 101</li>
+          <li>Never re-enter a burning building</li>
+        </ul>
+      </details>
+      <details class="guide-card">
+        <summary><span class="guide-emoji">⚡</span><span class="guide-title">Lightning / Storm</span><span class="guide-arrow">›</span></summary>
+        <ul>
+          <li>Stay indoors or in a hard-topped vehicle</li>
+          <li>Avoid tall, isolated trees</li>
+          <li>Keep away from metal fences and wires</li>
+          <li>Unplug electronics during lightning</li>
+          <li>Wait 30 min after last thunder before going out</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <!-- ===== COMMUNITY IMPACT STATS (NEW) ===== -->
+  <section class="section impact-section">
+    <div class="section-label">OUR IMPACT</div>
+    <h2 class="section-title">Why PanicZero Matters</h2>
+    <div class="impact-grid">
+      <div class="impact-card">
+        <div class="impact-num">~1200</div>
+        <div class="impact-label">people affected by natural disasters in India daily</div>
+        <div class="impact-source">Source: NDMA India</div>
+      </div>
+      <div class="impact-card highlight">
+        <div class="impact-num">3 min</div>
+        <div class="impact-label">average time saved with community early-warning systems</div>
+        <div class="impact-source">Critical window for evacuation</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-num">47%</div>
+        <div class="impact-label">of disaster deaths are preventable with early information</div>
+        <div class="impact-source">Source: WHO</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-num">0₹</div>
+        <div class="impact-label">cost to use PanicZero — always free, always available</div>
+        <div class="impact-source">Our commitment</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <div class="logo-mark small"><span class="logo-dot"></span></div>
+        <span class="footer-brand">PanicZero</span>
+      </div>
+      <p class="footer-tagline">Reducing panic to zero — one alert at a time.</p>
+      <div class="footer-divider"></div>
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>Emergency</h4>
+          <p>All Emergencies: <strong>112</strong></p>
+          <p>Fire Brigade: <strong>101</strong></p>
+          <p>Ambulance: <strong>102</strong></p>
+          <p>Police: <strong>100</strong></p>
+        </div>
+        <div class="footer-col">
+          <h4>Disaster Helplines</h4>
+          <p>NDRF: <strong>1078</strong></p>
+          <p>State Disaster: <strong>1070</strong></p>
+          <p>Flood Control: <strong>1800-11-0001</strong></p>
+        </div>
+        <div class="footer-col">
+          <h4>PanicZero</h4>
+          <p>AI-powered safety network</p>
+          <p>Built at HackMatrix 2026</p>
+          <p>VIT Bhopal</p>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 PanicZero. Built for India, powered by community.</p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='map.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
