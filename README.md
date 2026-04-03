@@ -78,7 +78,7 @@ resqnet/
 ---
 
 Requirements:
-flask
-flask-cors
-openai
-python-dotenv
+-flask
+-flask-cors
+-openai
+-python-dotenv
