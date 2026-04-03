@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PanicZero — Disaster Preparedness App</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">🚨 PanicZero</div>
+    <nav>
+      <a href="#alerts">Alerts</a>
+      <a href="#map">Map</a>
+      <a href="#report">Report</a>
+      <a href="#guide">Guide</a>
+    </nav>
+    <button class="crisis-btn" onclick="window.open('tel:112')">🆘 CRISIS</button>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Reducing Panic to Zero — One Alert at a Time.</h1>
+    <p>Get real-time disaster alerts, report incidents, and access emergency guides — even offline.</p>
+    <div class="location-bar">
+      <input type="text" id="location-input" placeholder="Enter your city or area..." />
+      <button onclick="getSummary()">Get Safety Alert</button>
+    </div>
+  </section>
+
+  <!-- AI Alert Summary -->
+  <section id="alerts" class="section">
+    <h2>AI Safety Summary</h2>
+    <div id="summary-card" class="summary-card">
+      <p id="summary-text">Enter your location above to get a local safety summary.</p>
+    </div>
+  </section>
+
+  <!-- Offline SVG Map -->
+  <section id="map" class="section">
+    <h2>Live Incident Map <span class="offline-badge">Offline Ready</span></h2>
+    <div class="map-wrapper">
+      <svg id="india-map" viewBox="0 0 600 540" xmlns="http://www.w3.org/2000/svg">
+        <!-- India outline (simplified) -->
+        <path d="M260,60 L290,55 L320,65 L350,60 L370,80 L390,75 L410,95 L420,120
+                 L440,130 L460,155 L470,180 L490,175 L500,195 L490,215 L480,235
+                 L460,250 L450,275 L455,300 L445,320 L430,340 L415,360 L400,375
+                 L385,390 L370,410 L355,425 L340,440 L325,455 L310,465 L295,455
+                 L280,440 L265,425 L250,410 L240,390 L225,370 L215,350 L205,325
+                 L195,300 L190,275 L195,250 L185,225 L175,200 L180,175 L195,155
+                 L205,135 L215,115 L225,95 L240,80 Z"
+              fill="#e8f4e8" stroke="#2ecc71" stroke-width="1.5"/>
+
+        <!-- Kashmir region -->
+        <path d="M240,80 L255,65 L270,55 L285,50 L300,52 L315,58 L330,62 L320,65 L290,55 L260,60 Z"
+              fill="#d5ebd5" stroke="#2ecc71" stroke-width="1"/>
+
+        <!-- Northeast region -->
+        <path d="M460,155 L475,145 L490,150 L505,165 L510,185 L500,195 L490,175 Z"
+              fill="#d5ebd5" stroke="#2ecc71" stroke-width="1"/>
+
+        <!-- City dots -->
+        <g id="cities">
+          <circle class="city-dot" data-city="Delhi"       cx="310" cy="145" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Delhi')"/>
+          <circle class="city-dot" data-city="Mumbai"      cx="230" cy="310" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Mumbai')"/>
+          <circle class="city-dot" data-city="Chennai"     cx="330" cy="420" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Chennai')"/>
+          <circle class="city-dot" data-city="Kolkata"     cx="450" cy="250" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Kolkata')"/>
+          <circle class="city-dot" data-city="Bangalore"   cx="300" cy="400" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Bangalore')"/>
+          <circle class="city-dot" data-city="Hyderabad"   cx="310" cy="345" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Hyderabad')"/>
+          <circle class="city-dot" data-city="Bhopal"      cx="295" cy="230" r="5" fill="#e74c3c" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Bhopal')"/>
+          <circle class="city-dot" data-city="Ahmedabad"   cx="210" cy="235" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Ahmedabad')"/>
+          <circle class="city-dot" data-city="Pune"        cx="240" cy="310" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Pune')"/>
+          <circle class="city-dot" data-city="Jaipur"      cx="265" cy="175" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Jaipur')"/>
+          <circle class="city-dot" data-city="Lucknow"     cx="355" cy="175" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Lucknow')"/>
+          <circle class="city-dot" data-city="Patna"       cx="400" cy="205" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Patna')"/>
+          <circle class="city-dot" data-city="Bhubaneswar" cx="415" cy="285" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Bhubaneswar')"/>
+          <circle class="city-dot" data-city="Guwahati"    cx="490" cy="175" r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Guwahati')"/>
+          <circle class="city-dot" data-city="Srinagar"    cx="265" cy="95"  r="5" fill="#3498db" stroke="#fff" stroke-width="1.5" cursor="pointer" onclick="highlightCity('Srinagar')"/>
+        </g>
+
+        <!-- City labels -->
+        <g font-family="sans-serif" font-size="11" fill="#1a1a2e">
+          <text x="318" y="142">Delhi</text>
+          <text x="238" y="307">Mumbai</text>
+          <text x="338" y="417">Chennai</text>
+          <text x="458" y="247">Kolkata</text>
+          <text x="308" y="397">Bangalore</text>
+          <text x="318" y="342">Hyderabad</text>
+          <text x="303" y="227">Bhopal</text>
+          <text x="218" y="232">Ahmedabad</text>
+          <text x="248" y="307">Pune</text>
+          <text x="273" y="172">Jaipur</text>
+          <text x="363" y="172">Lucknow</text>
+          <text x="408" y="202">Patna</text>
+          <text x="423" y="282">Bhubaneswar</text>
+          <text x="498" y="172">Guwahati</text>
+          <text x="273" y="92">Srinagar</text>
+        </g>
+
+        <!-- Legend -->
+        <g font-family="sans-serif" font-size="11">
+          <circle cx="20" cy="510" r="5" fill="#3498db"/>
+          <text x="30" y="514" fill="#444">City</text>
+          <circle cx="75" cy="510" r="5" fill="#e74c3c"/>
+          <text x="85" y="514" fill="#444">High</text>
+          <circle cx="120" cy="510" r="5" fill="#f39c12"/>
+          <text x="130" y="514" fill="#444">Medium</text>
+          <circle cx="185" cy="510" r="5" fill="#27ae60"/>
+          <text x="195" y="514" fill="#444">Low</text>
+        </g>
+      </svg>
+
+      <!-- Incident popup -->
+      <div id="map-popup"></div>
+    </div>
+    <p class="map-hint">Click any city dot to see incidents · Click a dot when reporting to auto-fill location</p>
+  </section>
+
+  <!-- Report Form -->
+  <section id="report" class="section">
+    <h2>Report an Incident</h2>
+    <form class="report-form" onsubmit="submitReport(event)">
+      <input type="text" id="report-location" placeholder="Location (e.g. Bhopal, MP)" required />
+      <textarea id="report-desc" placeholder="Describe the incident..." rows="4" required></textarea>
+      <input type="hidden" id="report-lat" value="23.2599"/>
+      <input type="hidden" id="report-lng" value="77.4126"/>
+      <button type="submit">Submit Report</button>
+    </form>
+    <div id="report-status"></div>
+  </section>
+
+  <!-- Offline Emergency Guide -->
+  <section id="guide" class="section">
+    <h2>Emergency Guide</h2>
+    <div class="guide-grid">
+      <div class="guide-card">
+        <h3>🌊 Flood</h3>
+        <ul>
+          <li>Move to higher ground immediately</li>
+          <li>Avoid walking in moving water</li>
+          <li>Turn off electricity at the main switch</li>
+          <li>Call 112 for evacuation help</li>
+        </ul>
+      </div>
+      <div class="guide-card">
+        <h3>🏚️ Earthquake</h3>
+        <ul>
+          <li>Drop, cover, and hold on</li>
+          <li>Stay away from windows</li>
+          <li>Do not use elevators</li>
+          <li>Check for gas leaks after shaking stops</li>
+        </ul>
+      </div>
+      <div class="guide-card">
+        <h3>🌡️ Heatwave</h3>
+        <ul>
+          <li>Stay indoors between 12 PM – 4 PM</li>
+          <li>Drink water every 30 minutes</li>
+          <li>Wear light, loose clothing</li>
+          <li>Check on elderly neighbours</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>PanicZero — Built at HackMatrix 2026, VIT Bhopal &nbsp;|&nbsp; Emergency: <strong>112</strong></p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='map.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
